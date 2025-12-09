@@ -1,0 +1,51 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f7f7f7;
+}
+
+.page {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.student-table {
+    border-collapse: collapse;
+    min-width: 500px;
+    background: #fff;
+}
+
+.student-table th,
+.student-table td {
+    border: 1px solid #333;
+    padding: 8px 10px;
+}
+
+.student-table th {
+    background: #eaeaea;
+}
+
+.detail {
+    text-align: left;
+}
+
+.detail .back {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.detail .detail-card {
+    border: 1px solid #333;
+    background: #fff;
+    padding: 15px;
+}
+
+.detail .detail-table {
+    margin-top: 12px;
+    width: 100%;
+}
+
