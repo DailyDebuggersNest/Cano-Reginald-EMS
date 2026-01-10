@@ -1,0 +1,394 @@
+<?php
+require_once '../config/db_helpers.php';
+
+$student_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($student_id <= 0) {
+    header('Location: ../index.php');
+    exit;
+}
+
+$conn = getDBConnection();
+$message = '';
+$message_type = '';
+
+// Get student data
+$sql = "SELECT s.*, p.program_name, p.program_code 
+        FROM students s 
+        LEFT JOIN programs p ON s.program_id = p.program_id 
+        WHERE s.student_id = ?";
+$result = db_query($conn, $sql, 'i', [$student_id]);
+
+if (!$result || $result->num_rows === 0) {
+    $conn->close();
+    header('Location: ../index.php?msg=notfound');
+    exit;
+}
+
+$student = db_fetch_one($result);
+
+// Get filter parameters
+$selected_year = isset($_GET['year']) ? intval($_GET['year']) : intval($student['year_level']);
+$selected_semester = isset($_GET['semester']) ? intval($_GET['semester']) : 1;
+if ($selected_year < 0) $selected_year = 0;
+if ($selected_year > 4) $selected_year = 4;
+if ($selected_semester !== 1 && $selected_semester !== 2) $selected_semester = 0;
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $updated = 0;
+    $errors = [];
+    
+    $conn->begin_transaction();
+    
+    try {
+        foreach ($_POST['grades'] as $enrollment_id => $grade_data) {
+            $enrollment_id = intval($enrollment_id);
+            $midterm = trim($grade_data['midterm'] ?? '');
+            $final = trim($grade_data['final'] ?? '');
+            $status = $grade_data['status'] ?? 'Enrolled';
+            
+            // Validate grades (Philippine grading: 1.00 = highest, 5.00 = failed)
+            $midterm_value = null;
+            $final_value = null;
+            
+            if ($midterm !== '') {
+                $midterm_value = floatval($midterm);
+                if ($midterm_value < 1.00 || $midterm_value > 5.00) {
+                    $errors[] = "Invalid midterm grade for enrollment #$enrollment_id. Must be between 1.00 and 5.00.";
+                    continue;
+                }
+            }
+            
+            if ($final !== '') {
+                $final_value = floatval($final);
+                if ($final_value < 1.00 || $final_value > 5.00) {
+                    $errors[] = "Invalid final grade for enrollment #$enrollment_id. Must be between 1.00 and 5.00.";
+                    continue;
+                }
+            }
+            
+            // Validate status
+            if (!in_array($status, ['Enrolled', 'Completed', 'Dropped', 'Failed'])) {
+                $status = 'Enrolled';
+            }
+            
+            // Auto-set status based on final grade
+            if ($final_value !== null) {
+                if ($final_value <= 3.00) {
+                    $status = 'Completed';
+                } else {
+                    $status = 'Failed';
+                }
+            }
+            
+            // Update enrollment
+            $update_sql = "UPDATE enrollments SET midterm_grade = ?, final_grade = ?, status = ? WHERE enrollment_id = ? AND student_id = ?";
+            $stmt = $conn->prepare($update_sql);
+            $stmt->bind_param('ddsii', $midterm_value, $final_value, $status, $enrollment_id, $student_id);
+            if ($stmt->execute() && $stmt->affected_rows >= 0) {
+                $updated++;
+            }
+            $stmt->close();
+        }
+        
+        if (empty($errors)) {
+            $conn->commit();
+            $message = "Grades updated successfully! ($updated enrollments processed)";
+            $message_type = 'success';
+        } else {
+            $conn->rollback();
+            $message = implode('<br>', $errors);
+            $message_type = 'error';
+        }
+    } catch (Exception $e) {
+        $conn->rollback();
+        $message = 'Error updating grades: ' . $e->getMessage();
+        $message_type = 'error';
+    }
+}
+
+// Get enrollments with grades for this student
+$grades_sql = "SELECT e.*, c.course_code, c.course_name, c.units, c.year_level, c.semester
+               FROM enrollments e
+               JOIN curriculum c ON e.curriculum_id = c.curriculum_id
+               WHERE e.student_id = ?";
+$params = [$student_id];
+$types = 'i';
+
+if ($selected_year > 0) {
+    $grades_sql .= " AND c.year_level = ?";
+    $params[] = $selected_year;
+    $types .= 'i';
+}
+if ($selected_semester > 0) {
+    $grades_sql .= " AND c.semester = ?";
+    $params[] = $selected_semester;
+    $types .= 'i';
+}
+$grades_sql .= " ORDER BY c.year_level, c.semester, c.course_code";
+$grades_result = db_query($conn, $grades_sql, $types, $params);
+$grades = $grades_result ? db_fetch_all($grades_result) : [];
+
+$conn->close();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Grades - <?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/details.css">
+    <style>
+        .grade-input {
+            width: 70px;
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .grade-input:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+        .grade-input.invalid {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+        .status-select {
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .form-actions .btn {
+            padding: 12px 30px;
+            font-size: 15px;
+        }
+        .grades-table input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        .grades-table input::-webkit-outer-spin-button,
+        .grades-table input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .grade-help {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #004085;
+        }
+        .grade-help strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .grade-scale {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .grade-scale span {
+            background: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Edit Grades</h1>
+            <div class="header-actions">
+                <a href="../index.php" class="btn btn-back">← Back to Student List</a>
+                <a href="student_grades.php?id=<?php echo $student_id; ?>" class="btn btn-grades">View Grades</a>
+                <a href="student_personal.php?id=<?php echo $student_id; ?>" class="btn btn-info">Personal Info</a>
+            </div>
+        </header>
+
+        <div class="student-header">
+            <div class="student-name"><?php echo htmlspecialchars($student['last_name'] . ', ' . $student['first_name'] . ' ' . ($student['middle_name'] ?? '')); ?></div>
+            <div class="student-info-summary">
+                <span class="info-item"><strong>Student No:</strong> <?php echo htmlspecialchars($student['student_number']); ?></span>
+                <span class="info-item"><strong>Program:</strong> <?php echo htmlspecialchars($student['program_code'] . ' - ' . $student['program_name']); ?></span>
+                <span class="info-item"><strong>Year Level:</strong> <?php echo htmlspecialchars($student['year_level']); ?></span>
+            </div>
+        </div>
+
+        <?php if ($message): ?>
+            <div class="message <?php echo $message_type; ?>">
+                <?php echo $message; ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="grade-help">
+            <strong>📝 Grade Entry Guide (Philippine Grading System)</strong>
+            <div class="grade-scale">
+                <span>1.00 - 1.25 = Excellent</span>
+                <span>1.50 - 1.75 = Very Good</span>
+                <span>2.00 - 2.50 = Good</span>
+                <span>2.75 - 3.00 = Passing</span>
+                <span>5.00 = Failed</span>
+            </div>
+            Leave blank for no grade. Status is auto-set when final grade is entered.
+        </div>
+
+        <div class="filter-section">
+            <form method="get" class="filter-form">
+                <input type="hidden" name="id" value="<?php echo $student_id; ?>">
+                <label for="yearFilter">Year Level:</label>
+                <select id="yearFilter" name="year" class="sort-select">
+                    <option value="0" <?php echo $selected_year === 0 ? 'selected' : ''; ?>>All Years</option>
+                    <?php for ($y = 1; $y <= 4; $y++): ?>
+                        <option value="<?php echo $y; ?>" <?php echo $selected_year === $y ? 'selected' : ''; ?>>Year <?php echo $y; ?></option>
+                    <?php endfor; ?>
+                </select>
+                <label for="semesterFilter">Semester:</label>
+                <select id="semesterFilter" name="semester" class="sort-select">
+                    <option value="0" <?php echo $selected_semester === 0 ? 'selected' : ''; ?>>All Semesters</option>
+                    <option value="1" <?php echo $selected_semester === 1 ? 'selected' : ''; ?>>1st Semester</option>
+                    <option value="2" <?php echo $selected_semester === 2 ? 'selected' : ''; ?>>2nd Semester</option>
+                </select>
+                <button type="submit" class="btn">Filter</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <?php if (empty($grades)): ?>
+                <p class="no-data">No enrollments found for this student<?php echo $selected_year > 0 ? ' for the selected filters' : ''; ?>.</p>
+            <?php else: ?>
+                <form method="post">
+                    <?php
+                    // Group grades by year and semester
+                    $grouped_grades = [];
+                    foreach ($grades as $grade) {
+                        $key = 'Year ' . $grade['year_level'] . ' - Semester ' . $grade['semester'];
+                        if (!isset($grouped_grades[$key])) {
+                            $grouped_grades[$key] = [];
+                        }
+                        $grouped_grades[$key][] = $grade;
+                    }
+                    ?>
+                    
+                    <?php foreach ($grouped_grades as $group_name => $group): ?>
+                        <h3 class="section-title"><?php echo htmlspecialchars($group_name); ?></h3>
+                        <table class="info-table grades-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Units</th>
+                                    <th>Midterm</th>
+                                    <th>Final</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($group as $grade): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($grade['course_code']); ?></td>
+                                        <td><?php echo htmlspecialchars($grade['course_name']); ?></td>
+                                        <td class="center"><?php echo htmlspecialchars($grade['units']); ?></td>
+                                        <td class="center">
+                                            <input type="number" 
+                                                   name="grades[<?php echo $grade['enrollment_id']; ?>][midterm]" 
+                                                   class="grade-input"
+                                                   value="<?php echo $grade['midterm_grade'] !== null ? number_format($grade['midterm_grade'], 2) : ''; ?>"
+                                                   min="1.00" max="5.00" step="0.25"
+                                                   placeholder="-">
+                                        </td>
+                                        <td class="center">
+                                            <input type="number" 
+                                                   name="grades[<?php echo $grade['enrollment_id']; ?>][final]" 
+                                                   class="grade-input"
+                                                   value="<?php echo $grade['final_grade'] !== null ? number_format($grade['final_grade'], 2) : ''; ?>"
+                                                   min="1.00" max="5.00" step="0.25"
+                                                   placeholder="-">
+                                        </td>
+                                        <td class="center">
+                                            <select name="grades[<?php echo $grade['enrollment_id']; ?>][status]" class="status-select">
+                                                <option value="Enrolled" <?php echo $grade['status'] === 'Enrolled' ? 'selected' : ''; ?>>Enrolled</option>
+                                                <option value="Completed" <?php echo $grade['status'] === 'Completed' ? 'selected' : ''; ?>>Completed</option>
+                                                <option value="Dropped" <?php echo $grade['status'] === 'Dropped' ? 'selected' : ''; ?>>Dropped</option>
+                                                <option value="Failed" <?php echo $grade['status'] === 'Failed' ? 'selected' : ''; ?>>Failed</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endforeach; ?>
+
+                    <div class="form-actions">
+                        <a href="student_grades.php?id=<?php echo $student_id; ?>" class="btn btn-back">Cancel</a>
+                        <button type="submit" class="btn btn-add">Save All Grades</button>
+                    </div>
+                </form>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Validate grade inputs
+        document.querySelectorAll('.grade-input').forEach(input => {
+            input.addEventListener('blur', function() {
+                const value = parseFloat(this.value);
+                if (this.value !== '' && (value < 1.00 || value > 5.00)) {
+                    this.classList.add('invalid');
+                } else {
+                    this.classList.remove('invalid');
+                }
+            });
+        });
+
+        // Loading spinner
+        function showSpinner() {
+            document.getElementById('loadingSpinner').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Add loading spinner to forms
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function() {
+                showSpinner();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+1. Make student, courses and curriculum seperate on index.php
+2. Tables to add: enrollment and subjects_enrolled.
+3. For courses only show course_code, course_name, units and description. Also add a selector for specific year_level, and curriculum_id.
+4. For curriculum only show curriculum_id, curriculum_code, curriculum_name. Also add a selector for curriculum_id, curriculum_name and description.
+5. Now connect the students corresponding to its courses and curriculum taken. Up to its year enrolled (1st year) up to each current student's year level and semester.
+6. On student_details, add a selector for which year they first enrolled up to current year and semester enrolled and the specific courses they have taken. Add a status for when they completed a whole year or semester. 

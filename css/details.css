@@ -1,0 +1,516 @@
+/* ===================================
+   Details Page Styles - Student Details
+   =================================== */
+
+/* Header Actions */
+.header-actions {
+    margin-top: 12px;
+}
+
+/* View Tabs */
+.view-tabs {
+    display: flex;
+    gap: 0;
+    margin: 25px 0;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.tab-btn {
+    padding: 14px 28px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tab-btn:hover {
+    color: #212529;
+}
+
+.tab-btn.active {
+    color: #212529;
+    border-bottom-color: #212529;
+    font-weight: 600;
+}
+
+/* Student Details Section */
+.student-details {
+    margin-top: 10px;
+}
+
+.student-details h2 {
+    font-size: 20px;
+    margin: 45px 0 24px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+    color: #212529;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+}
+
+.student-details h2:first-child {
+    margin-top: 0;
+}
+
+.student-details h3 {
+    font-size: 16px;
+    margin: 30px 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Info Table (for personal details) */
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+.info-table th,
+.info-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #e9ecef;
+    font-size: 14px;
+}
+
+.info-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    width: 18%;
+    white-space: nowrap;
+}
+
+.info-table td {
+    background: #fff;
+    color: #212529;
+}
+
+/* Courses Header with Filter */
+.courses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 45px 0 20px 0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.courses-header h2 {
+    margin: 0;
+}
+
+.semester-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.semester-filter label {
+    font-size: 13px;
+    color: #868e96;
+    font-weight: 400;
+}
+
+/* Info Section */
+.info-section {
+    margin-bottom: 45px;
+}
+
+.info-item {
+    display: flex;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-item:first-child {
+    padding-top: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #868e96;
+    width: 200px;
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+.info-value {
+    color: #212529;
+    flex: 1;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* Courses Section */
+.courses-section {
+    margin-top: 12px;
+    font-size: 13px;
+}
+.course-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 20px 0;
+}
+
+.course-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.course-code {
+    font-weight: 600;
+    color: #212529;
+    font-size: 15px;
+}
+
+.course-units {
+    color: #868e96;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.course-name {
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.course-description {
+    color: #868e96;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Student Name Header */
+.student-name-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.student-name-header h2 {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+.program-badge {
+    background: #e9ecef;
+    color: #495057;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Filter Section */
+.filter-section {
+    margin-bottom: 30px;
+}
+
+.schedule-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.schedule-filter label {
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.total-units-badge {
+    background: linear-gradient(135deg, #0066cc, #004499);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Schedule Table */
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.schedule-table th,
+.schedule-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.schedule-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+}
+
+.schedule-table td {
+    font-size: 14px;
+    color: #212529;
+}
+
+.schedule-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* Summary Table */
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.summary-table th,
+.summary-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.summary-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #495057;
+}
+
+/* Student Header for Grades Page */
+.student-header {
+    background: #f8f9fa;
+    padding: 20px 25px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.student-name {
+    font-size: 22px;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 12px;
+}
+
+.student-info-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.student-info-summary .info-item {
+    padding: 0;
+    border: none;
+    font-size: 14px;
+    color: #495057;
+}
+
+.student-info-summary .info-item strong {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.gwa-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #198754;
+}
+
+/* Grades Table */
+.grades-table {
+    margin-bottom: 30px;
+}
+
+.grades-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grades-table td.center,
+.grades-table th.center {
+    text-align: center;
+}
+
+.grades-table td.right {
+    text-align: right;
+}
+
+.grade-cell {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.grade-excellent {
+    color: #0f5132;
+    background: #d1e7dd;
+}
+
+.grade-good {
+    color: #055160;
+    background: #cff4fc;
+}
+
+.grade-average {
+    color: #664d03;
+    background: #fff3cd;
+}
+
+.grade-pass {
+    color: #856404;
+    background: #ffeeba;
+}
+
+.grade-fail {
+    color: #842029;
+    background: #f8d7da;
+}
+
+.grade-row.enrolled {
+    background: #fffbf0;
+}
+
+.grade-row.completed {
+    background: #fff;
+}
+
+.semester-summary {
+    background: #f8f9fa;
+}
+
+.semester-summary td {
+    font-weight: 500;
+}
+
+.gwa-label {
+    background: #198754;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* GWA Summary */
+.gwa-summary {
+    background: linear-gradient(90deg, #198754 0%, #157347 100%);
+    color: #fff;
+    padding: 18px 25px;
+    border-radius: 8px;
+    margin-top: 30px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.gwa-summary strong {
+    font-size: 18px;
+}
+
+.gwa-note {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #212529;
+    margin: 30px 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-title:first-child {
+    margin-top: 0;
+}
+
+/* Navigation Buttons */
+.navigation-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .info-label {
+        width: 140px;
+    }
+
+    .info-value {
+        font-size: 13px;
+    }
+
+    .course-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .student-name-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .schedule-filter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .student-header {
+        padding: 15px 18px;
+    }
+    
+    .student-info-summary {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .gwa-summary {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .navigation-buttons {
+        margin-top: 15px;
+    }
+}
