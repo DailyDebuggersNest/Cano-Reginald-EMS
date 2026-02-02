@@ -412,6 +412,10 @@ student_system21/
 - ✅ **Revenue Summary**: Grid layout with better visual hierarchy
 - ✅ **Mobile Responsiveness**: Better layout on smaller screens
 
+### Future-Proof Academic Year (February 2, 2026)
+- ✅ **Dynamic Year Generation**: `add_student.php` now automatically generates the current academic year and the next 2 years. No manual code updates required.
+- ✅ **Smart Filtering**: Schedule/Grades filter logic (`db_helpers.php`) updated to seamlessly combine historical enrollment records with current year logic.
+
 ### File Organization
 - ✅ PHP pages moved to `pages/` folder
 - ✅ Config files in `config/` folder
