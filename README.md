@@ -69,9 +69,8 @@ student_system21/
 ├── pages/                    # PHP page files
 │   ├── add_student.php       # Add new student form
 │   ├── drop_student.php      # Drop student confirmation
-│   ├── enroll_student.php    # Enroll student in courses (NEW)
+│   ├── enrollment.php        # Enrollment page with term code, program, schedule selection
 │   ├── edit_student.php      # Edit student information
-│   ├── edit_enrollment.php   # Edit student enrollment
 │   ├── edit_grades.php       # Grade entry form
 │   ├── student_personal.php  # Student personal information
 │   ├── student_finance.php   # Student account & payment records
@@ -354,9 +353,11 @@ student_system21/
 - **Enrollment System Refactor**: Separated "Add Student" from enrollment. Added specific enrollment page with conflict checking.
 
 ### Enrollment & Conflicts
-- ✅ **New Enrollment Page**: `enroll_student.php` handles course selection by year/semester.
+- ✅ **Enrollment Page**: `enrollment.php` handles term code validation, student lookup, program selection, and bulk enrollment.
+- ✅ **Schedule Suggestions**: Autocomplete and filtered list based on program/year/semester.
+- ✅ **Bulk Enrollment**: Add multiple subjects, review in confirmation modal, then enroll.
 - ✅ **Conflict Detection**: Prevents enrollment if schedules overlap.
-- ✅ **Manual Enrollment**: "Enroll" action added to student list.
+- ✅ **Program Assignment**: Updates student's program when enrolling.
 
 ### Grade Entry System
 - ✅ New edit_grades.php page for entering grades

@@ -5,9 +5,6 @@ $conn = getDBConnection();
 $message = '';
 $message_type = '';
 
-// Get all programs for dropdown (cached for performance)
-$programs = getCachedPrograms($conn);
-
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name = trim($_POST['first_name'] ?? '');
@@ -17,10 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gender = $_POST['gender'] ?? '';
     $address = trim($_POST['address'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
-    $program_id = intval($_POST['program_id'] ?? 0);
     $year_level = intval($_POST['year_level'] ?? 1);
     $enroll_semester = intval($_POST['enroll_semester'] ?? 1);
-    $academic_year = $_POST['academic_year'] ?? '2025-2026';
     
     // Validation
     $errors = [];
@@ -30,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid email format';
     if (empty($date_of_birth)) $errors[] = 'Date of birth is required';
     if (empty($gender)) $errors[] = 'Gender is required';
-    if ($program_id <= 0) $errors[] = 'Please select a program';
     if ($year_level < 1 || $year_level > 4) $errors[] = 'Invalid year level';
     if ($enroll_semester < 1 || $enroll_semester > 2) $errors[] = 'Invalid semester';
     
@@ -65,19 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Insert student (middle_name is optional)
             $middle_name = trim($_POST['middle_name'] ?? '');
-            $insert_sql = "INSERT INTO students (student_number, first_name, middle_name, last_name, email, date_of_birth, gender, address, phone, program_id, year_level, current_semester, status) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Active')";
+            $insert_sql = "INSERT INTO students (student_number, first_name, middle_name, last_name, email, date_of_birth, gender, address, phone, year_level, current_semester, status) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Active')";
             $stmt = $conn->prepare($insert_sql);
             if (!$stmt) {
                 throw new Exception("Prepare failed: " . $conn->error);
             }
-            $stmt->bind_param('sssssssssiii', $student_number, $first_name, $middle_name, $last_name, $email, $date_of_birth, $gender, $address, $phone, $program_id, $year_level, $enroll_semester);
+            $stmt->bind_param('ssssssssiii', $student_number, $first_name, $middle_name, $last_name, $email, $date_of_birth, $gender, $address, $phone, $year_level, $enroll_semester);
             $stmt->execute();
             $new_student_id = $conn->insert_id;
             $stmt->close();
-            
-            // Get program name for redirect
-            $prog_info = db_fetch_one(db_query($conn, "SELECT program_code FROM programs WHERE program_id = ?", 'i', [$program_id]));
             
             $conn->commit();
             
@@ -85,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->close();
             $redirect_url = '../index.php?msg=added&name=' . urlencode($first_name . ' ' . $last_name) 
                           . '&student_number=' . urlencode($student_number)
-                          . '&program=' . urlencode($prog_info['program_code'] ?? '')
                           . '&student_id=' . $new_student_id;
             header('Location: ' . $redirect_url);
             exit;
@@ -266,40 +256,6 @@ $conn->close();
                 <!-- Academic Information -->
                 <div class="form-section">
                     <h3>Academic Information</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="program_id">Program <span class="required">*</span></label>
-                            <select id="program_id" name="program_id" required>
-                                <option value="">Select Program</option>
-                                <option value="1">BSIT - Bachelor of Science in Information Technology</option>
-                                <option value="2">BSCS - Bachelor of Science in Computer Science</option>
-                                <option value="3">BSIS - Bachelor of Science in Information Systems</option>
-                                <option value="4">BSBA - Bachelor of Science in Business Administration</option>
-                                <option value="5">BSE - Bachelor of Science in Education</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="academic_year">Academic Year <span class="required">*</span></label>
-                            <?php 
-                            $current_year = date('Y');
-                            $default_academic_year = $current_year . '-' . ($current_year + 1);
-                            ?>
-                            <select id="academic_year" name="academic_year" required>
-                                <?php 
-                                $curr_yr = intval(date('Y'));
-                                // Generate options for current year and next 2 years
-                                for ($i = 0; $i < 3; $i++) {
-                                    $start = $curr_yr + $i;
-                                    $end = $start + 1;
-                                    $opt_val = "$start-$end";
-                                    // Default to current year (offset 0) or fallback to system default
-                                    $is_selected = ($i === 0) ? 'selected' : '';
-                                    echo "<option value=\"$opt_val\" $is_selected>$opt_val</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="year_level">Year Level <span class="required">*</span></label>

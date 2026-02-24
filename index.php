@@ -233,6 +233,7 @@ if ($selected_program > 0) {
         <nav class="mobile-nav" id="mobileNav">
             <a class="nav-link <?php echo $view === 'students' ? 'active' : ''; ?>" href="?view=students">Students</a>
             <a class="nav-link <?php echo ($view === 'programs' || $view === 'curriculum') ? 'active' : ''; ?>" href="?view=programs">Academics</a>
+            <a class="nav-link" href="pages/enrollment.php">Enrollment</a>
             <a class="nav-link" href="pages/dashboard.php">Analytics</a>
             <a class="nav-link" href="pages/finance.php">Finance</a>
         </nav>
@@ -242,6 +243,7 @@ if ($selected_program > 0) {
                 <a class="btn <?php echo $view === 'students' ? 'btn-primary' : ''; ?>" href="?view=students">Students</a>
                 <a class="btn <?php echo $view === 'programs' ? 'btn-primary' : ''; ?>" href="?view=programs">Programs</a>
                 <a class="btn <?php echo $view === 'curriculum' ? 'btn-primary' : ''; ?>" href="?view=curriculum">Curriculum</a>
+                <a class="btn" href="pages/enrollment.php">Enrollment</a>
                 <a class="btn" href="pages/dashboard.php">Analytics</a>
                 <a class="btn" href="pages/finance.php">Finance</a>
                 <?php if ($view === 'students'): ?>
